@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Conference Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --ivory:#F6F3EC;
+    --card:#FFFFFF;
+    --ink:#1F2933;
+    --ink-soft:#4B5563;
+    --muted:#8A8577;
+    --line:#E4DFD3;
+    --brass:#9C7A3C;
+    --brass-deep:#6E5527;
+    --brass-tint:#F1E7D2;
+    --navy:#22314A;
+    --navy-deep:#16202F;
+    --sage:#5C7A63;
+    --sage-tint:#E4EBE2;
+    --danger:#B3492F;
+    --danger-tint:#F5E5DF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:40px 24px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;}
+  h1{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:28px;
+    margin:0;
+    color:var(--ink);
+  }
+  .sub{font-size:13px;color:var(--muted);margin-top:4px;}
+
+  button{
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    border:none;
+  }
+  .add-btn{
+    background:var(--navy);
+    color:var(--ivory);
+    font-size:13px;
+    font-weight:500;
+    padding:10px 18px;
+    border-radius:6px;
+    transition:background .15s ease;
+  }
+  .add-btn:hover{background:var(--navy-deep);}
+
+  /* Spotlight */
+  .spotlight{
+    background:var(--navy);
+    border-radius:10px;
+    padding:28px 30px;
+    display:flex;
+    gap:28px;
+    align-items:center;
+    margin-bottom:36px;
+  }
+  .spotlight .datebox{
+    text-align:center;
+    min-width:88px;
+    border-right:1px solid rgba(255,255,255,0.15);
+    padding-right:28px;
+  }
+  .spotlight .month{
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:#B9C2D4;
+    text-transform:uppercase;
+  }
+  .spotlight .day{
+    font-family:'Source Serif 4',serif;
+    font-size:44px;
+    font-weight:600;
+    color:#fff;
+    line-height:1.05;
+  }
+  .spotlight .year{font-size:13px;color:#B9C2D4;}
+  .spotlight .content{flex:1;min-width:0;}
+  .spotlight .eyebrow{font-size:12px;color:#9FB0C9;margin-bottom:6px;}
+  .spotlight .name{
+    font-family:'Source Serif 4',serif;
+    font-size:22px;
+    color:#fff;
+    margin:0 0 10px;
+    line-height:1.3;
+  }
+  .conf-link{
+    color:inherit;
+    text-decoration:none;
+    border-bottom:1px solid rgba(255,255,255,0.35);
+  }
+  .conf-link:hover{border-bottom-color:rgba(255,255,255,0.8);}
+  .row .name .conf-link{
+    color:var(--ink);
+    border-bottom:1px solid var(--line);
+  }
+  .row .name .conf-link:hover{border-bottom-color:var(--brass);}
+  .spotlight .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    font-size:13px;
+    color:#DCE2ED;
+  }
+  .spotlight .meta-row span{display:flex;align-items:center;gap:6px;}
+  .spotlight .submission-pill{
+    display:inline-block;
+    margin-top:14px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    font-size:12.5px;
+    padding:6px 12px;
+    border-radius:5px;
+  }
+  .spotlight .submission-pill.urgent{
+    background:var(--danger-tint);
+    color:var(--danger);
+  }
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+    font-size:14px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+  }
+
+  .section-label{
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:0.02em;
+    margin:0 0 12px 2px;
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:16px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  .row:first-child{border-top:1px solid var(--line);}
+  .row .datebadge{
+    min-width:52px;
+    text-align:center;
+  }
+  .row .datebadge .m{font-size:11px;color:var(--muted);text-transform:uppercase;}
+  .row .datebadge .d{font-family:'Source Serif 4',serif;font-size:22px;font-weight:600;color:var(--ink);}
+
+  .row .main{flex:1;min-width:0;}
+  .row .name{font-size:14.5px;font-weight:500;color:var(--ink);margin:0 0 4px;}
+  .row .details{font-size:12.5px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:14px;}
+  .row .details span{display:flex;align-items:center;gap:5px;}
+
+  .tag{
+    font-size:11.5px;
+    padding:4px 10px;
+    border-radius:20px;
+    background:var(--sage-tint);
+    color:var(--sage);
+    white-space:nowrap;
+    cursor:default;
+  }
+  .tag.tag-purple{
+    background:#EDE4F5;
+    color:#6B3FA0;
+  }
+
+  .status-pill{
+    font-size:11.5px;
+    padding:4px 10px;
+    border-radius:20px;
+    background:var(--brass-tint);
+    color:var(--brass-deep);
+    white-space:nowrap;
+    display:inline-block;
+  }
+  .status-pill.status-green{
+    background:#E1F0E4;
+    color:#2F7A3D;
+  }
+
+  .row .actions{display:flex;gap:4px;opacity:0;transition:opacity .1s;}
+  .row:hover .actions, .row:focus-within .actions{opacity:1;}
+  .icon-btn{
+    background:none;
+    color:var(--muted);
+    font-size:12px;
+    padding:6px 8px;
+    border-radius:4px;
+  }
+  .icon-btn:hover{background:var(--line);color:var(--ink);}
+  .icon-btn:focus-visible{
+    opacity:1;
+    outline:2px solid var(--brass);
+    outline-offset:2px;
+    background:var(--line);
+    color:var(--ink);
+  }
+
+  .deadline-flag{
+    font-size:12px;
+    color:var(--danger);
+  }
+
+  /* Form */
+  .form-panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+    margin-bottom:32px;
+  }
+  .form-panel h2{
+    font-family:'Source Serif 4',serif;
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 16px;
+  }
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
+  .field input, .field textarea{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#FCFBF8;
+    color:var(--ink);
+  }
+  .field input:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--brass);
+  }
+  .field textarea{resize:vertical;min-height:56px;font-family:'Inter',sans-serif;}
+  .error{font-size:12px;color:var(--danger);}
+
+  .form-actions{display:flex;gap:10px;margin-top:4px;}
+  .save-btn{
+    background:var(--brass);
+    color:#fff;
+    font-size:13px;
+    font-weight:500;
+    padding:9px 18px;
+    border-radius:6px;
+  }
+  .save-btn:hover{background:var(--brass-deep);}
+  .cancel-btn{
+    background:none;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:9px 14px;
+  }
+  .cancel-btn:hover{color:var(--ink);}
+
+  @media (max-width:560px){
+    .spotlight{flex-direction:column;align-items:flex-start;}
+    .spotlight .datebox{border-right:none;padding-right:0;}
+    .grid2{grid-template-columns:1fr;}
+    .row{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>Conference tracker</h1>
+      <div class="sub" id="subline">Loading&hellip;</div>
+    </div>
+    <button class="add-btn" id="addToggle">+ Add conference</button>
+  </div>
+
+  <div class="form-panel" id="formPanel" style="display:none;"></div>
+
+  <div id="spotlightArea"></div>
+
+  <div id="listArea"></div>
+
+</div>
+
+<script>
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let conferences = [];
+let editingId = null;
+
+const SEED_DATA = [{"id": "seed0", "name": "AHA Leadership Summit", "startDate": "2026-07-12", "location": "Denver, CO", "submissionDate": "2025-11-01", "submissionDetails": "Typically November. 2027 will be in San Diego 7/18-7/20", "audience": "Hospital Operations Leaders", "audienceFull": "Senior health system executives (CEOs, COOs, CFOs, CMOs, CNOs, CIOs), VPs, and physician leaders", "status": "", "link": "https://leadershipsummit.aha.org/"}, {"id": "seed1", "name": "American College of Surgeons Quality and Safety Conference", "startDate": "2026-07-30", "location": "Orlando", "submissionDate": "2026-03-16", "submissionDetails": "Mid March", "audience": "", "audienceFull": "", "status": "Lynne presented on Haldol prescribing reduction", "link": "https://www.facs.org/for-medical-professionals/conferences-and-meetings/quality-safety-and-cancer-conference/"}, {"id": "seed2", "name": "Huron \u201cWhat's Right in Health Care\u201d", "startDate": "2026-08-04", "location": "Fort Worth, TX", "submissionDate": "2026-05-01", "submissionDetails": "", "audience": "Hospital Operations Leaders", "audienceFull": "Healthcare executives, clinical and operational leaders, workforce/HR leaders at hospitals and health systems (many Huron clients)", "status": "", "link": "https://www.huronconsultinggroup.com/en/events/whats-right-in-health-care"}, {"id": "seed3", "name": "Epic User Group Meeting (UGM)", "startDate": "2026-08-17", "location": "Verona, WI (Epic campus)", "submissionDate": "2026-03-30", "submissionDetails": "Typicallty late March/early April", "audience": "Hospital Operations Leaders", "audienceFull": "Physicians, clinicians, nurses, pharmacists, informaticists, and IT/administrative staff at Epic customer organizations", "status": "Submitted \u2013 Accepted", "link": "https://www.ugm.epic.com/"}, {"id": "seed4", "name": "Society for Implementation Research Collaboration (SIRC) Conference", "startDate": "2026-09-25", "location": "Minneapolis, MN", "submissionDate": "2026-05-01", "submissionDetails": "", "audience": "Clinical Leaders", "audienceFull": "Implementation researchers, practitioners, and community providers across behavioral/mental health, medicine, public health, child welfare, education, and prevention", "status": "Submitted \u2013 Accepted", "link": "https://societyforimplementationresearchcollaboration.org/conference-other-events/biennial-conference/2026-conference/"}, {"id": "seed5", "name": "American College of Surgeons Annual Clinical Congress", "startDate": "2026-09-26", "location": "Washington, DC", "submissionDate": "2026-03-02", "submissionDetails": "Owen H. Wangensteen Scientific Forum, videos, and history posters due Mar 2; late-breaking High-Impact Clinical Trials & Studies due Jul 1.", "audience": "", "audienceFull": "", "status": "", "link": "https://www.facs.org/for-medical-professionals/conferences-and-meetings/clinical-congress-2026/"}, {"id": "seed6", "name": "Mississippi Healthcare Collaborative (MHC) Annual Conference", "startDate": "2026-09-27", "location": "Fairhope, AL", "submissionDate": "", "submissionDetails": "N/A \u2013 appears to be curated by MHC organizers; exhibitor/sponsor applications open separately", "audience": "Hospital Operations Leaders", "audienceFull": "Mississippi hospital executives, Medicaid officials, physicians, state policymakers, health plan executives, and healthcare innovators", "status": "", "link": "https://mshealthcarecollaborative.com/2026-annual-conference/"}, {"id": "seed7", "name": "NCQA Health Innovation Summit", "startDate": "2026-10-04", "location": "Atlanta, GA", "submissionDate": "2026-02-27", "submissionDetails": "2026 window already passed with no submission made", "audience": "Hospital Operations Leaders", "audienceFull": "Health plan and health system quality leaders, HEDIS/digital quality professionals, policymakers/regulators, health equity, data, and innovation leaders, NCQA-accredited organizations", "status": "", "link": "https://events.ncqa.org/summit2026"}, {"id": "seed8", "name": "Advances in Learning Health System Sciences Conference", "startDate": "2026-10-05", "location": "Minneapolis, MN (historically)", "submissionDate": "2026-06-14", "submissionDetails": "", "audience": "Clinical Leaders", "audienceFull": "Learning health system (LHS) researchers, health system operations leaders, data scientists, implementation scientists", "status": "", "link": "https://med.umn.edu/clhss/conference"}, {"id": "seed9", "name": "Montreal Palliative Care Conference", "startDate": "2026-10-06", "location": "Palais des congr\u00e8s de Montr\u00e9al, Montr\u00e9al, QC", "submissionDate": "2026-02-07", "submissionDetails": "50th anniversary edition (MIPCC 2026). Submission window ran Oct 1, 2025 - Feb 7, 2026.", "audience": "", "audienceFull": "", "status": "", "link": "https://mipcc2026.ca/"}, {"id": "seed10", "name": "Association of California Healthcare Districts (ACHD) Annual Meeting", "startDate": "2026-10-07", "location": "Monterey, CA", "submissionDate": "2026-08-21", "submissionDetails": "Currently open (7/29/26), no due date", "audience": "Hospital Operations Leaders", "audienceFull": "California healthcare district board members, governance leaders, and district executives", "status": "", "link": "https://www.achd.org/2026-annual-meeting/"}, {"id": "seed11", "name": "Society of Black Academic Surgeons (SBAS)", "startDate": "2026-10-22", "location": "New Brunswick, NJ", "submissionDate": "2026-04-16", "submissionDetails": "36th Annual SBAS Meeting, hosted by Rutgers Health-New Jersey Medical School. Submission window: Mar 3 - Apr 16, 2026.", "audience": "", "audienceFull": "", "status": "", "link": "https://www.sbas.net/annual-meeting/"}, {"id": "seed12", "name": "Gerontological Society of America (GSA) Annual Scientific Meeting", "startDate": "2026-11-04", "location": "National Harbor, MD", "submissionDate": "2026-03-05", "submissionDetails": "Regular abstracts closed 3/5/2026; late-breaking research window was 7/13\u20138/21/2026", "audience": "Geriatric Leaders", "audienceFull": "Gerontology and aging researchers, clinicians, educators, and practitioners across disciplines (biology, health sciences, social/behavioral sciences, policy)", "status": "Submitted \u2013 Accepted", "link": "https://www.gsa2026.org/"}, {"id": "seed13", "name": "HLTH USA", "startDate": "2026-11-15", "location": "Las Vegas, NV", "submissionDate": "2026-06-29", "submissionDetails": "Typically June. Speakers nominated via Become a Speaker program", "audience": "Hospital Operations Leaders", "audienceFull": "Health system executives, digital health/biotech innovators, investors, startups, and policymakers across the health ecosystem", "status": "", "link": "https://hlth.com/events/usa/"}, {"id": "seed14", "name": "Age-Friendly Health Systems Symposium (connected to IHI Forum)", "startDate": "2026-12-06", "location": "Phoenix, AZ", "submissionDate": "2026-09-15", "submissionDetails": "2026-09-15 00:00:00", "audience": "Geriatric Leaders", "audienceFull": "Interprofessional hospital, ambulatory, skilled nursing, home health, and (new in 2026) hospice teams implementing age-friendly care", "status": "", "link": "https://afhsresearchnetwork.ucsf.edu/content/afhs-symposium-poster-submission"}, {"id": "seed15", "name": "IHI Forum", "startDate": "2026-12-06", "location": "", "submissionDate": "2026-09-30", "submissionDetails": "Podium presentations end of April, posters end of Sept", "audience": "Clinical Leaders", "audienceFull": "Quality improvement and patient safety professionals, health system leaders, and improvement science researchers", "status": "", "link": "https://events.ihi.org/forum/present"}, {"id": "seed16", "name": "AcademyHealth Dissemination & Implementation (D&I) Conference", "startDate": "2026-12-13", "location": "National Harbor, MD", "submissionDate": "2026-07-16", "submissionDetails": "", "audience": "Clinical Leaders", "audienceFull": "Dissemination and implementation (D&I) science researchers, practitioners, and policymakers", "status": "Submitted \u2013 Pending Decision", "link": "https://academyhealth.confex.com/academyhealth/2026di/cfp.cgi"}, {"id": "seed17", "name": "AHA Rural Health Care Leadership Conference", "startDate": "2027-01-31", "location": "Orlando, FL", "submissionDate": "2026-05-29", "submissionDetails": "Speaker proposals were due 5/29/2026 \u2013 WHA@AHA has a confirmed panel at this conference", "audience": "Hospital Operations Leaders", "audienceFull": "Rural hospital and health system leaders (CEOs, COOs, board members, physician leaders)", "status": "Confirmed \u2013 Panel", "link": "https://ruralconference.aha.org/"}, {"id": "seed18", "name": "Academic Surgical Congress (Christy and Zara typically attend)", "startDate": "2027-02-09", "location": "Washington, DC", "submissionDate": "", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://www.academicsurgicalcongress.org/"}, {"id": "seed19", "name": "ViVE", "startDate": "2027-03-14", "location": "Nashville, TN", "submissionDate": "2026-09-30", "submissionDetails": "Rolling, opens September", "audience": "Hospital Operations Leaders", "audienceFull": "Health system CIOs, CDOs, CMIOs, and other digital health executives, plus technology partners, payers, investors, and policymakers", "status": "", "link": "https://hlth.com/events/vive/"}, {"id": "seed20", "name": "Annual Assembly of Hospice and Palliative Care (AAHPM)", "startDate": "2027-03-17", "location": "Pittsburgh, PA", "submissionDate": "2026-09-28", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://aahpm.org/education-events/annual-assembly/"}, {"id": "seed21", "name": "American College of Healthcare Executives (ACHE) Congress on Healthcare Leadership", "startDate": "2027-03-22", "location": "Nashville, TN", "submissionDate": "2026-05-30", "submissionDetails": "2026 window already passed BUT posters are open through August 31", "audience": "Hospital Operations Leaders", "audienceFull": "Healthcare executives across the career span (early-careerists to CEOs, COOs, CFOs, CMOs, CNOs, CIOs)", "status": "", "link": "https://congress.ache.org/"}, {"id": "seed22", "name": "Society of Hospital Medicine (SHM) Converge", "startDate": "2027-03-30", "location": "Las Vegas, NV (historically)", "submissionDate": "2026-05-03", "submissionDetails": "", "audience": "Clinical Leaders", "audienceFull": "Hospitalists, hospital medicine APPs, residents, and hospital medicine group leaders", "status": "", "link": "https://shmconverge.hospitalmedicine.org/"}, {"id": "seed23", "name": "HIMSS Global Health Conference & Exhibition (HIMSS27)", "startDate": "2027-04-05", "location": "Chicago, IL", "submissionDate": "2026-06-30", "submissionDetails": "", "audience": "Hospital Operations Leaders", "audienceFull": "Healthcare IT professionals, hospital executives, CIOs, informaticists, technology vendors, clinicians, and government officials", "status": "", "link": "https://www.himssconference.com/"}, {"id": "seed25", "name": "American Organization for Nursing Leadership", "startDate": "2027-04-12", "location": "Phoenix, AZ", "submissionDate": "2026-08-28", "submissionDetails": "", "audience": "Nurse leaders, executives", "audienceFull": "Nurse leaders, executives", "status": "Submitted panel - Pending", "link": "https://inspiringleaders.aonl.org/"}, {"id": "seed26", "name": "American Surgical Association Annual Meeting", "startDate": "2027-04-15", "location": "Houston, TX", "submissionDate": "", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://americansurgical.org/"}, {"id": "seed27", "name": "AHA Annual Membership Meeting", "startDate": "2027-04-18", "location": "Washington, DC", "submissionDate": "", "submissionDetails": "N/A \u2013 policy/advocacy-focused; largely AHA-curated plenary and Hill Day content, no open abstract call. Maybe potential thorugh AHA partnership to speak", "audience": "Hospital Operations Leaders", "audienceFull": "Hospital and health system leaders, trustees, and advocates focused on federal health policy", "status": "", "link": "https://annualmeeting.aha.org/"}, {"id": "seed28", "name": "Becker's Healthcare 17th Annual Meeting", "startDate": "2027-04-19", "location": "Chicago, IL", "submissionDate": "2026-07-19", "submissionDetails": "Confirmed pattern (Becker's official Call for Speakers page): submissions open ~11 months before, agendas roughly finalized ~9 months before. For this April 2027 event, that's ~July 19, 2026 \u2013 right at/just past that mark now; worth checking whether the agenda has closed", "audience": "Hospital Operations Leaders", "audienceFull": "Senior hospital/health system executives (CEOs, CFOs, CMOs, COOs, CNOs, CIOs, CMIOs, Chief Strategy Officers)", "status": "MGB to see internal interest in speaking", "link": "https://conferences.beckershospitalreview.com/upcoming-events"}, {"id": "seed29", "name": "Johns Hopkins Activity and Mobility Promotion (JH-AMP) Conference", "startDate": "2027-04-27", "location": "TBD (details forthcoming)", "submissionDate": "", "submissionDetails": "Can't locate", "audience": "Geriatric Leaders", "audienceFull": "Interprofessional hospital mobility teams (nursing, PT/OT, physicians, hospital leadership)", "status": "", "link": "https://www.hopkinsmedicine.org/physical-medicine-rehabilitation/education-training/amp/conference"}, {"id": "seed30", "name": "AHA Healthier Together Conference (formerly Accelerating Health Equity / ACHI Conference)", "startDate": "2027-05-01", "location": "Anaheim, CA", "submissionDate": "2026-08-31", "submissionDetails": "Call for Content \u201copens soon\u201d for 2027 (per official site) \u2013 typically closes around September\u2013October for a May conference", "audience": "Clinical Leaders", "audienceFull": "Population health, community health, and health equity leaders working on access, community/patient engagement, and data", "status": "Submitting general panel topic", "link": "https://healthiertogether.aha.org/"}, {"id": "seed31", "name": "American Geriatrics Society (AGS) Annual Meeting", "startDate": "2027-05-19", "location": "Atlanta, GA", "submissionDate": "2026-12-02", "submissionDetails": "", "audience": "Geriatric Leaders", "audienceFull": "Geriatricians, geriatric psychiatrists, and allied health professionals in aging care", "status": "", "link": "https://meeting.americangeriatrics.org/"}, {"id": "seed32", "name": "AcademyHealth Annual Research Meeting (ARM)", "startDate": "2027-06-12", "location": "Boston, MA", "submissionDate": "2026-12-15", "submissionDetails": "Early January", "audience": "Researchers, Clinical Leaders", "audienceFull": "Health services researchers, health policy analysts, policymakers, health system leaders, and practitioners", "status": "", "link": "https://academyhealth.org/ARM2026"}, {"id": "seed33", "name": "AHA Leadership Summit", "startDate": "2027-07-18", "location": "San Diego, CA", "submissionDate": "2026-11-01", "submissionDetails": "Typically November. 2027 will be in San Diego 7/18-7/20", "audience": "Hospital Operations Leaders", "audienceFull": "Senior health system executives (CEOs, COOs, CFOs, CMOs, CNOs, CIOs), VPs, and physician leaders", "status": "", "link": "https://leadershipsummit.aha.org/"}, {"id": "seed34", "name": "American Association for the Surgery of Trauma (AAST) Annual Meeting", "startDate": "2027-09-15", "location": "Hyatt Regency, Chicago, IL", "submissionDate": "2027-02-15", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://www.aast.org/education/annual-meeting/past-and-future-meeting.html?_gl=1*1px248y*_up*MQ..*_ga*NDk4NDkyOTYxLjE3ODYwNTA0ODA.*_ga_F9CFFLC40K*czE3ODYwNTA0NzkkbzEkZzEkdDE3ODYwNTA0ODMkajU2JGwwJGgw"}, {"id": "seed35", "name": "Becker's Healthcare Health IT + Digital Health + RCM Conference (\u201cBecker's Digital Health\u201d)", "startDate": "2027-09-27", "location": "Chicago, IL", "submissionDate": "2026-12-15", "submissionDetails": "2026 window already passed (agenda finalized ~Dec 2025) with no submission made \u2013 rolled forward to the confirmed 2027 edition. Following the ~11/9-month pattern, that puts the practical deadline around Dec 27, 2026", "audience": "Hospital Operations Leaders", "audienceFull": "Health IT, revenue cycle, finance, and technology executives and senior leaders from hospitals and health systems", "status": "", "link": "https://conferences.beckershospitalreview.com/upcoming-events"}, {"id": "seed36", "name": "National Assocation of ACOs (NACOS)", "startDate": "2027-10-04", "location": "Washington, DC", "submissionDate": "", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://www.naacos.com/fall-2026-conference/"}, {"id": "seed37", "name": "American College of Surgeons Annual Clinical Congress", "startDate": "2027-10-16", "location": "San Diego, CA", "submissionDate": "", "submissionDetails": "", "audience": "", "audienceFull": "", "status": "", "link": "https://www.facs.org/for-medical-professionals/conferences-and-meetings/event-calendar/acs-events/?eventid=182056464&trumbaEmbed=view%3Devent%26eventid%3D182056464"}, {"id": "seed38", "name": "Becker's Healthcare Fall Chief Pharmacy Officer Summit", "startDate": "2027-11-04", "location": "Chicago, IL", "submissionDate": "2027-02-01", "submissionDetails": "2026 window already passed (agenda finalized ~Feb 2026) with no submission made \u2013 rolled forward. 2027 edition dates not yet announced (historically held in November)", "audience": "Hospital Operations Leaders", "audienceFull": "Chief Pharmacy Officers and senior pharmacy leaders from hospitals and health systems", "status": "", "link": "https://conferences.beckershospitalreview.com/fallcpo-2026"}, {"id": "seed39", "name": "American Medical Informatics Association (AMIA) Annual Symposium", "startDate": "2027-11-06", "location": "San Diego, CA", "submissionDate": "2027-03-01", "submissionDetails": "2026 deadline already closed (was 3/10/2026) with no submission made \u2013 rolled forward to 2027. Typically around March; exact date not yet posted", "audience": "Clinical Leaders", "audienceFull": "Clinical/health informatics professionals (physicians, nurses, dentists, pharmacists), translational/clinical informatics researchers and educators", "status": "", "link": "https://amia.org/education-events/annual-symposium"}, {"id": "seed40", "name": "American Public Health Association (APHA) Annual Meeting", "startDate": "2027-11-07", "location": "Philadelphia, PA", "submissionDate": "2027-03-31", "submissionDetails": "2026 submission window already closed (was 1/5\u20133/31/2026) with no submission made \u2013 rolled forward to 2027. Typically opens early January, closes end of March", "audience": "Clinical Leaders", "audienceFull": "Public health professionals across epidemiology, policy, community health, environmental health, academia, and students", "status": "", "link": "https://www.apha.org/events-and-meetings/annual"}];
+
+function parseDate(s){ return s ? new Date(s+'T00:00:00') : null; }
+function fmt(d){ if(!d) return ''; return MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+function daysUntil(d){ const t = new Date(); t.setHours(0,0,0,0); return Math.round((d - t)/86400000); }
+function uid(){ return 'c' + Date.now() + Math.floor(Math.random()*1000); }
+
+async function loadConferences(){
+  try{
+    const raw = localStorage.getItem('conferences');
+    conferences = raw ? JSON.parse(raw) : null;
+  }catch(e){
+    conferences = null;
+  }
+  if(conferences === null){
+    conferences = SEED_DATA;
+    await saveConferences();
+  }
+  render();
+}
+
+async function saveConferences(){
+  try{
+    localStorage.setItem('conferences', JSON.stringify(conferences));
+  }catch(e){
+    console.error('Storage error', e);
+  }
+}
+
+function sortedUpcoming(){
+  const today = new Date(); today.setHours(0,0,0,0);
+  return conferences
+    .filter(c => { const d = parseDate(c.startDate); return d && d >= today; })
+    .sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+}
+
+function render(){
+  const upcoming = sortedUpcoming();
+  const sub = document.getElementById('subline');
+  sub.textContent = upcoming.length
+    ? upcoming.length + ' upcoming conference' + (upcoming.length===1?'':'s')
+    : 'No upcoming conferences yet';
+
+  const spotlightArea = document.getElementById('spotlightArea');
+  const listArea = document.getElementById('listArea');
+
+  if(upcoming.length === 0){
+    spotlightArea.innerHTML = '';
+    listArea.innerHTML = '<div class="empty">Add your first conference to see it spotlighted here.</div>';
+    return;
+  }
+
+  const [featured, ...rest] = upcoming;
+  spotlightArea.innerHTML = renderSpotlight(featured);
+  bindRowActions(spotlightArea, featured.id);
+
+  if(rest.length){
+    listArea.innerHTML =
+      '<div class="section-label">Also on the calendar</div>' +
+      rest.map(renderRow).join('');
+    rest.forEach(c => bindRowActions(listArea, c.id));
+  } else {
+    listArea.innerHTML = '';
+  }
+}
+
+function submissionInfo(c){
+  const sd = parseDate(c.submissionDate);
+  if(!sd) return '';
+  const days = daysUntil(sd);
+  let label;
+  if(days < 0) label = 'Submission closed &middot; ' + fmt(sd);
+  else if(days === 0) label = 'Submission due today';
+  else label = 'Submission due ' + fmt(sd) + ' (' + days + ' day' + (days===1?'':'s') + ')';
+  const urgent = days >= 0 && days <= 90;
+  return { label, urgent };
+}
+
+function renderSpotlight(c){
+  const d = parseDate(c.startDate);
+  const sub = submissionInfo(c);
+  return '<div class="spotlight">' +
+    '<div class="datebox">' +
+      '<div class="month">' + MONTHS[d.getMonth()] + '</div>' +
+      '<div class="day">' + d.getDate() + '</div>' +
+      '<div class="year">' + d.getFullYear() + '</div>' +
+    '</div>' +
+    '<div class="content">' +
+      '<div class="eyebrow">Next up</div>' +
+      '<p class="name">' + nameMarkup(c) + '</p>' +
+      (c.status ? '<div style="margin-bottom:10px;">' + statusMarkup(c) + '</div>' : '') +
+      '<div class="meta-row">' +
+        (c.location ? '<span>' + escapeHtml(c.location) + '</span>' : '') +
+        (c.audience ? '<span title="' + escapeHtml(c.audienceFull||c.audience) + '"' + (isPurpleAudience(c.audience) ? ' style="color:#C9A6EE;font-weight:500;"' : '') + '>' + escapeHtml(c.audience) + '</span>' : '') +
+      '</div>' +
+      (sub ? '<div class="submission-pill' + (sub.urgent ? ' urgent' : '') + '">' + sub.label + '</div>' : '') +
+      (c.submissionDetails ? '<div style="margin-top:10px;font-size:12.5px;color:#C7CFDD;">' + escapeHtml(c.submissionDetails) + '</div>' : '') +
+    '</div>' +
+    '<div class="actions" style="opacity:1;">' +
+      '<button class="icon-btn" style="color:#DCE2ED;" data-edit="' + c.id + '" aria-label="Edit ' + escapeHtml(c.name) + '">Edit</button>' +
+      '<button class="icon-btn" style="color:#DCE2ED;" data-delete="' + c.id + '" aria-label="Remove ' + escapeHtml(c.name) + '">Remove</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderRow(c){
+  const d = parseDate(c.startDate);
+  const sub = submissionInfo(c);
+  return '<div class="row">' +
+    '<div class="datebadge">' +
+      '<div class="m">' + MONTHS[d.getMonth()] + '</div>' +
+      '<div class="d">' + d.getDate() + '</div>' +
+    '</div>' +
+    '<div class="main">' +
+      '<p class="name">' + nameMarkup(c) + '</p>' +
+      (c.status ? '<div style="margin-bottom:6px;">' + statusMarkup(c) + '</div>' : '') +
+      '<div class="details">' +
+        (c.location ? '<span>' + escapeHtml(c.location) + '</span>' : '') +
+        (sub ? '<span class="' + (sub.urgent ? 'deadline-flag' : '') + '">' + sub.label + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    (c.audience ? '<span class="tag' + (isPurpleAudience(c.audience) ? ' tag-purple' : '') + '" title="' + escapeHtml(c.audienceFull||c.audience) + '">' + escapeHtml(c.audience) + '</span>' : '') +
+    '<div class="actions">' +
+      '<button class="icon-btn" data-edit="' + c.id + '" aria-label="Edit ' + escapeHtml(c.name) + '">Edit</button>' +
+      '<button class="icon-btn" data-delete="' + c.id + '" aria-label="Remove ' + escapeHtml(c.name) + '">Remove</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function bindRowActions(container, id){
+  const editBtn = container.querySelector('[data-edit="' + id + '"]');
+  const delBtn = container.querySelector('[data-delete="' + id + '"]');
+  if(editBtn) editBtn.onclick = () => openForm(id);
+  if(delBtn) delBtn.onclick = async () => {
+    conferences = conferences.filter(c => c.id !== id);
+    await saveConferences();
+    render();
+  };
+}
+
+const PURPLE_AUDIENCES = new Set([
+  'hospital operations leaders',
+  'clinical leaders',
+  'geriatric leaders',
+  'nurse leaders, executives',
+  'researchers, clinical leaders'
+]);
+function isPurpleAudience(audience){
+  return audience && PURPLE_AUDIENCES.has(audience.trim().toLowerCase());
+}
+
+function statusMarkup(c, extraStyle){
+  if(!c.status) return '';
+  const isAccepted = /accepted/i.test(c.status);
+  const cls = 'status-pill' + (isAccepted ? ' status-green' : '');
+  const style = extraStyle ? ' style="' + extraStyle + '"' : '';
+  return '<span class="' + cls + '"' + style + '>' + escapeHtml(c.status) + '</span>';
+}
+
+function nameMarkup(c){
+  if(c.link){
+    return '<a class="conf-link" href="' + escapeHtml(c.link) + '" target="_blank" rel="noopener">' + escapeHtml(c.name) + '</a>';
+  }
+  return escapeHtml(c.name);
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function openForm(id){
+  editingId = id || null;
+  const existing = id ? conferences.find(c => c.id === id) : null;
+  const panel = document.getElementById('formPanel');
+  panel.style.display = 'block';
+  panel.innerHTML =
+    '<h2>' + (existing ? 'Edit conference' : 'Add conference') + '</h2>' +
+    '<div class="field"><label for="f-name">Conference name</label><input id="f-name" value="' + (existing ? escapeHtml(existing.name) : '') + '" placeholder="Health Equity Summit"></div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label for="f-start">Conference date</label><input type="date" id="f-start" value="' + (existing ? existing.startDate : '') + '"></div>' +
+      '<div class="field"><label for="f-location">Location</label><input id="f-location" value="' + (existing ? escapeHtml(existing.location||'') : '') + '" placeholder="Chicago, IL"></div>' +
+    '</div>' +
+    '<div class="field"><label for="f-link">Conference link</label><input id="f-link" value="' + (existing ? escapeHtml(existing.link||'') : '') + '" placeholder="https://example.org/conference"></div>' +
+    '<div class="grid2">' +
+      '<div class="field"><label for="f-subdate">Submission deadline</label><input type="date" id="f-subdate" value="' + (existing ? (existing.submissionDate||'') : '') + '"></div>' +
+      '<div class="field"><label for="f-audience">Audience</label><input id="f-audience" value="' + (existing ? escapeHtml(existing.audience||'') : '') + '" placeholder="Board, funders"></div>' +
+    '</div>' +
+    '<div class="field"><label for="f-subdetails">Submission details</label><textarea id="f-subdetails" placeholder="Abstract, 300 words, via portal">' + (existing ? escapeHtml(existing.submissionDetails||'') : '') + '</textarea></div>' +
+    '<div class="field"><label for="f-status">Status</label><input id="f-status" value="' + (existing ? escapeHtml(existing.status||'') : '') + '" placeholder="Submitted \u2013 Accepted"></div>' +
+    '<div class="error" id="f-error" style="display:none;" role="alert" aria-live="assertive"></div>' +
+    '<div class="form-actions">' +
+      '<button class="save-btn" id="f-save">' + (existing ? 'Save changes' : 'Add conference') + '</button>' +
+      '<button class="cancel-btn" id="f-cancel">Cancel</button>' +
+    '</div>';
+
+  document.getElementById('f-cancel').onclick = closeForm;
+  document.getElementById('f-save').onclick = async () => {
+    const name = document.getElementById('f-name').value.trim();
+    const startDate = document.getElementById('f-start').value;
+    const errEl = document.getElementById('f-error');
+    if(!name || !startDate){
+      errEl.textContent = 'Enter a conference name and date.';
+      errEl.style.display = 'block';
+      return;
+    }
+    const record = Object.assign({}, existing || {}, {
+      id: existing ? existing.id : uid(),
+      name,
+      startDate,
+      location: document.getElementById('f-location').value.trim(),
+      link: document.getElementById('f-link').value.trim(),
+      submissionDate: document.getElementById('f-subdate').value,
+      submissionDetails: document.getElementById('f-subdetails').value.trim(),
+      audience: document.getElementById('f-audience').value.trim(),
+      audienceFull: document.getElementById('f-audience').value.trim(),
+      status: document.getElementById('f-status').value.trim()
+    });
+    if(existing){
+      conferences = conferences.map(c => c.id === existing.id ? record : c);
+    } else {
+      conferences.push(record);
+    }
+    await saveConferences();
+    closeForm();
+    render();
+  };
+}
+
+function closeForm(){
+  editingId = null;
+  const panel = document.getElementById('formPanel');
+  panel.style.display = 'none';
+  panel.innerHTML = '';
+}
+
+document.getElementById('addToggle').onclick = () => {
+  const panel = document.getElementById('formPanel');
+  if(panel.style.display === 'block' && !editingId){ closeForm(); }
+  else openForm(null);
+};
+
+loadConferences();
+</script>
+</body>
+</html>
